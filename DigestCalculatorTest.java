@@ -30,17 +30,23 @@ public class DigestCalculatorTest {
         // }
 
         DigestCalculator dc = new DigestCalculator();
-        byte[] b = dc.getFileContent("/Users/pilarfernandez/Documents/INF1416/INF1416-G1 Trab 3/teste.txt");
+        // byte[] b =
+        // dc.getFileContent("/Users/pilarfernandez/Documents/INF1416/INF1416-G1 Trab
+        // 3/teste.txt");
 
-        System.out.println("print de fora");
-        for (int i = 0; i < b.length; i++) {
-            System.out.println(b[i]);
-        }
+        // System.out.println("print de fora");
+        // for (int i = 0; i < b.length; i++) {
+        // System.out.println(b[i]);
+        // }
 
-        DigestStatus ds = dc.getDigestFromList("/Users/pilarfernandez/Documents/INF1416/INF1416-G1 Trab 3/lista.txt",
-                "arq1", "sha1", "asjhkfhkfd");
+        // DigestStatus ds =
+        // dc.getDigestFromList("/Users/pilarfernandez/Documents/INF1416/INF1416-G1 Trab
+        // 3/lista.txt",
+        // "arq1", "sha1", "asjhkfhkfd");
 
-        System.out.println(ds);
+        dc.listWriter("/Users/pilarfernandez/Documents/INF1416/INF1416-G1 Trab 3/lista.txt", "arq4", "sha1",
+                "asjhkfhkfd".getBytes());
+        // System.out.println(ds);
 
     }
 }
