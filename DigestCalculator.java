@@ -1,23 +1,25 @@
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
 public class DigestCalculator {
     private MessageDigest md;
 
-    // public byte[] calculateDigest(byte[] msg, String pattern) {
-    // this.md = MessageDigest.getInstance(pattern);
-    // byte[] digest = md.update(msg);
-    // return digest;
-    // }
+    public String calculateDigest(byte[] msg, String pattern) throws NoSuchAlgorithmException {
+        this.md = MessageDigest.getInstance(pattern);
+        this.md.update(msg);
+        byte[] digest = this.md.digest();
+        return this.convertToHex(digest).toString();
+    }
 
-    public void listWriter(String path, String fileName, String pattern, byte[] digest) throws IOException {
+    public void addOrReplaceDigestOnListFile(String path, String fileName, String pattern, String digest)
+            throws IOException {
         FileWriter writer = null;
         File file = new File(path);
         Scanner sc = new Scanner(file);
@@ -36,7 +38,7 @@ public class DigestCalculator {
                 for (int i = 1; i < splited.length - 1; i += 2) {
                     if (splited[i].equals(pattern)) {
                         System.out.println("dentro do if splited[i] == pattern");
-                        splited[i + 1] = digest.toString(); // HEXADECIMAL TROCAR
+                        splited[i + 1] = digest;
                         break;
                     }
                     System.out.println("depois do if splited[i] == pattern");
@@ -44,7 +46,7 @@ public class DigestCalculator {
                     String[] temp2 = new String[splited.length + 2];
                     System.arraycopy(splited, 0, temp2, 0, splited.length);
                     temp2[temp2.length - 2] = pattern;
-                    temp2[temp2.length - 1] = digest.toString();
+                    temp2[temp2.length - 1] = digest;
                     splited = temp2;
                 }
             }
@@ -58,7 +60,7 @@ public class DigestCalculator {
         if (!achou) {
             System.out.println("!achou");
             writer = new FileWriter(path, true);
-            writer.write(fileName + " " + pattern + " " + digest.toString());
+            writer.write(fileName + " " + pattern + " " + digest + '\n');
         } else {
             System.out.println("else do !achou");
 
@@ -77,8 +79,7 @@ public class DigestCalculator {
     // Busca se o digest do tipo procurado para o arquivo procurado já se encontra
     // na lista de arquivos. Se sim, retorna o digest que está registrado , se não,
     // retorna nulo.
-    // Nome_Arq<SP>Tipo_Digest<SP>Digest_Hex[<SP>TipoDigest<SP>Digest_Hex]<EOL>
-    public DigestStatus getDigestFromList(String ListName, String fileName, String pattern, String digest)
+    public DigestStatus generateDigestStatusFromList(String ListName, String fileName, String pattern, String digest)
             throws IOException {
         File file = new File(ListName);
         Scanner sc = new Scanner(file);
@@ -110,6 +111,7 @@ public class DigestCalculator {
     // formato de array de byte
     public byte[] getFileContent(String path) throws Exception {
         File file = new File(path);
+        System.out.println(path);
         String text = "";
         try (FileInputStream fileInputStream = new FileInputStream(file)) {
             int singleCharInt;

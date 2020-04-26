@@ -1,53 +1,37 @@
+import java.io.File;
+
 public class DigestCalculatorTest {
     public static void main(String args[]) throws Exception {
-        // if (args == null || args.length < 3) {
-        // System.out.println(
-        // "Por favor envie o tipo digest e os caminhos e arquivos necessários pela
-        // linha de comando");
-        // System.exit(1);
-        // }
 
-        // String Tipo_Digest = args[0];
-        // String Caminho_ArqListaDiges = args[1];
-        // String Caminho_da_Pasta_dos_Arquivos = args[2];
+        if (args == null || args.length < 3) {
+            System.out.println(
+                    "Por favor envie o tipo digest e os caminhos e arquivos necessários pela linha de comando");
+            System.exit(1);
+        }
 
-        // switch (Tipo_Digest) {
-        // case "MD5withRSA":
-        // Tipo_Digest = "MD5";
-        // break;
-        // case "SHA1withRSA":
-        // Tipo_Digest = "SHA-1";
-        // break;
-        // case "SHA256withRSA":
-        // Tipo_Digest = "SHA-256";
-        // break;
-        // case "SHA512withRSA":
-        // Tipo_Digest = "SHA-512";
-        // break;
-        // default:
-        // System.out.println("Tipo de digest inválido.");
-        // System.exit(1);
-        // }
+        String Tipo_Digest = args[0];
+        String Caminho_ArqListaDigest = args[1];
+        String Caminho_da_Pasta_dos_Arquivos = args[2];
 
-        DigestCalculator dc = new DigestCalculator();
-        // byte[] b =
-        // dc.getFileContent("/Users/pilarfernandez/Documents/INF1416/INF1416-G1 Trab
-        // 3/teste.txt");
+        File folder = new File(Caminho_da_Pasta_dos_Arquivos);
+        File fileEntry = null;
+        for (File f : folder.listFiles()) {
+            System.out.println(f.getName().charAt(0));
+            if (!f.isDirectory() && f.getName().charAt(0) != '.') {
+                fileEntry = f;
+                DigestCalculator dc = new DigestCalculator();
+                byte[] fileContent = dc.getFileContent(fileEntry.getAbsolutePath());
 
-        // System.out.println("print de fora");
-        // for (int i = 0; i < b.length; i++) {
-        // System.out.println(b[i]);
-        // }
+                String digest = dc.calculateDigest(fileContent, Tipo_Digest);
 
-        // DigestStatus ds =
-        // dc.getDigestFromList("/Users/pilarfernandez/Documents/INF1416/INF1416-G1 Trab
-        // 3/lista.txt",
-        // "arq1", "sha1", "asjhkfhkfd");
+                DigestStatus ds = dc.generateDigestStatusFromList(Caminho_ArqListaDigest, f.getName(), Tipo_Digest,
+                        digest);
 
-        dc.listWriter("/Users/pilarfernandez/Documents/INF1416/INF1416-G1 Trab 3/lista.txt", "arq4", "sha1",
-                "asjhkfhkfd".getBytes());
-        // System.out.println(ds);
-
+                if (ds != DigestStatus.OK)
+                    dc.addOrReplaceDigestOnListFile(Caminho_ArqListaDigest, f.getName(), Tipo_Digest, digest);
+                System.out.println(fileEntry.getName() + " " + Tipo_Digest + " " + digest + " " + ds.toString());
+            }
+        }
     }
 }
 
