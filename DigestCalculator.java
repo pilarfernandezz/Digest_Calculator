@@ -1,6 +1,7 @@
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 import java.io.File;
@@ -23,51 +24,28 @@ public class DigestCalculator {
         FileWriter writer = null;
         File file = new File(path);
         Scanner sc = new Scanner(file);
-        List<String> temp = new ArrayList<String>();
+        List<String> newLines = new ArrayList<String>();
         Boolean achou = false;
         while (sc.hasNextLine()) {
             String line = sc.nextLine();
-            System.out.println(line);
 
-            String[] splited = line.split(" ");
+            List<String> splited = new ArrayList<String>();
 
-            if (splited[0].equals(fileName)) {
-                System.out.println("splited[0]  " + splited[0] + " fileName " + fileName);
+            splited = Arrays.asList(line.split(" "));
+
+            if (splited.get(0).equals(fileName)) {
                 writer = new FileWriter(path);
                 achou = true;
-                for (int i = 1; i < splited.length - 1; i += 2) {
-                    if (splited[i].equals(pattern)) {
-                        System.out.println("dentro do if splited[i] == pattern");
-                        splited[i + 1] = digest;
-                        break;
-                    }
-                    System.out.println("depois do if splited[i] == pattern");
-
-                    String[] temp2 = new String[splited.length + 2];
-                    System.arraycopy(splited, 0, temp2, 0, splited.length);
-                    temp2[temp2.length - 2] = pattern;
-                    temp2[temp2.length - 1] = digest;
-                    splited = temp2;
-                }
+                line = line.concat(" " + pattern + " " + digest);
             }
-            String aux = "";
-            for (int i = 0; i < splited.length; i++) {
-                aux = aux.concat(splited[i] + " ");
-            }
-            temp.add(aux);
+            newLines.add(line);
         }
 
         if (!achou) {
-            System.out.println("!achou");
             writer = new FileWriter(path, true);
             writer.write(fileName + " " + pattern + " " + digest + '\n');
         } else {
-            System.out.println("else do !achou");
-
-            for (String s : temp) {
-                System.out.println("s");
-                System.out.println(s);
-
+            for (String s : newLines) {
                 writer.write(s + '\n');
             }
         }
@@ -90,17 +68,18 @@ public class DigestCalculator {
 
             String[] splited = line.split(" ");
 
-            // for (int i = 0; i < splited.length; i++)
-            // System.out.println("splited " + splited[i]);
-            System.out.println(splited[2] + " " + digest);
-            if (splited[0].equals(fileName) && splited[1].equals(pattern)) {
-                if (digest.equals(splited[2])) {
-                    ds = DigestStatus.OK;
-                } else if (!digest.equals(splited[2])) {
-                    ds = DigestStatus.NOT_OK;
+            for (int i = 1; i < splited.length - 1; i += 2) {
+                if (splited[0].equals(fileName)) {
+                    if (splited[i].equals(pattern)) {
+                        if (digest.equals(splited[i + 1])) {
+                            ds = DigestStatus.OK;
+                        } else if (!digest.equals(splited[i + 1])) {
+                            ds = DigestStatus.NOT_OK;
+                        }
+                    }
+                } else if (splited[i].equals(pattern) && digest.equals(splited[i + 1])) {
+                    ds = DigestStatus.COLISION;
                 }
-            } else if (splited[1].equals(pattern) && digest.equals(splited[2])) {
-                ds = DigestStatus.COLISION;
             }
         }
         sc.close();
@@ -111,7 +90,6 @@ public class DigestCalculator {
     // formato de array de byte
     public byte[] getFileContent(String path) throws Exception {
         File file = new File(path);
-        System.out.println(path);
         String text = "";
         try (FileInputStream fileInputStream = new FileInputStream(file)) {
             int singleCharInt;
@@ -121,8 +99,6 @@ public class DigestCalculator {
                 singleChar = (char) singleCharInt;
                 text += singleChar;
             }
-            System.out.println("print de dentro");
-            System.out.println(text);
 
             return text.getBytes();
         } catch (Exception e) {

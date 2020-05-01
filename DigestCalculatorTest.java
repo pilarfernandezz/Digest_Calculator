@@ -16,7 +16,7 @@ public class DigestCalculatorTest {
         File folder = new File(Caminho_da_Pasta_dos_Arquivos);
         File fileEntry = null;
         for (File f : folder.listFiles()) {
-            System.out.println(f.getName().charAt(0));
+
             if (!f.isDirectory() && f.getName().charAt(0) != '.') {
                 fileEntry = f;
                 DigestCalculator dc = new DigestCalculator();
@@ -27,7 +27,7 @@ public class DigestCalculatorTest {
                 DigestStatus ds = dc.generateDigestStatusFromList(Caminho_ArqListaDigest, f.getName(), Tipo_Digest,
                         digest);
 
-                if (ds != DigestStatus.OK)
+                if (ds == DigestStatus.NOT_FOUND)
                     dc.addOrReplaceDigestOnListFile(Caminho_ArqListaDigest, f.getName(), Tipo_Digest, digest);
                 System.out.println(fileEntry.getName() + " " + Tipo_Digest + " " + digest + " " + ds.toString());
             }
