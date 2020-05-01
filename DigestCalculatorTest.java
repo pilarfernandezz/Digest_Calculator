@@ -2,6 +2,7 @@ import java.io.File;
 
 public class DigestCalculatorTest {
     public static void main(String args[]) throws Exception {
+
         if (args == null || args.length < 3) {
             System.out.println(
                     "Por favor envie o tipo digest e os caminhos e arquivos necessários pela linha de comando");

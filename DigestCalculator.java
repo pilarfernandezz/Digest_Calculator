@@ -12,6 +12,7 @@ import java.io.IOException;
 public class DigestCalculator {
     private MessageDigest md;
 
+
     // Calcula o digest da mensagem passada para o padrão especificado
     public String calculateDigest(byte[] msg, String pattern) throws NoSuchAlgorithmException {
         this.md = MessageDigest.getInstance(pattern);
@@ -19,6 +20,7 @@ public class DigestCalculator {
         byte[] digest = this.md.digest();
         return this.convertToHex(digest).toString();
     }
+
 
     // Procura na lista de arquivos em qual linha o arquivo está cadastrado.
     // Escreve no final da linha o padrão e o valor do digest correpondente
@@ -57,6 +59,7 @@ public class DigestCalculator {
             writer.close();
             sc.close();
         }
+
     }
 
     // Busca se o digest do tipo procurado para o arquivo procurado já se encontra
@@ -64,6 +67,7 @@ public class DigestCalculator {
     // retorna nulo.
     public DigestStatus generateDigestStatusFromList(String ListName, String fileName, String pattern, String digest)
             throws IOException {
+
         File file = null;
         Scanner sc = null;
         try {
