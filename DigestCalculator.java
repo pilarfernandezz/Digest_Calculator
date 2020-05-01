@@ -12,6 +12,7 @@ import java.io.IOException;
 public class DigestCalculator {
     private MessageDigest md;
 
+    // Calcula o digest da mensagem passada para o padrão especificado
     public String calculateDigest(byte[] msg, String pattern) throws NoSuchAlgorithmException {
         this.md = MessageDigest.getInstance(pattern);
         this.md.update(msg);
@@ -19,39 +20,43 @@ public class DigestCalculator {
         return this.convertToHex(digest).toString();
     }
 
-    public void addOrReplaceDigestOnListFile(String path, String fileName, String pattern, String digest)
-            throws IOException {
+    // Procura na lista de arquivos em qual linha o arquivo está cadastrado.
+    // Escreve no final da linha o padrão e o valor do digest correpondente
+    public void addDigestOnListFile(String path, String fileName, String pattern, String digest) throws IOException {
         FileWriter writer = null;
-        File file = new File(path);
-        Scanner sc = new Scanner(file);
-        List<String> newLines = new ArrayList<String>();
-        Boolean achou = false;
-        while (sc.hasNextLine()) {
-            String line = sc.nextLine();
+        Scanner sc = null;
+        try {
+            File file = new File(path);
+            sc = new Scanner(file);
+            List<String> newLines = new ArrayList<String>();
+            Boolean achou = false;
+            while (sc.hasNextLine()) {
+                String line = sc.nextLine();
+                List<String> splited = new ArrayList<String>();
 
-            List<String> splited = new ArrayList<String>();
+                splited = Arrays.asList(line.split(" "));
 
-            splited = Arrays.asList(line.split(" "));
-
-            if (splited.get(0).equals(fileName)) {
-                writer = new FileWriter(path);
-                achou = true;
-                line = line.concat(" " + pattern + " " + digest);
+                if (splited.get(0).equals(fileName)) {
+                    writer = new FileWriter(path);
+                    achou = true;
+                    line = line.concat(" " + pattern + " " + digest);
+                }
+                newLines.add(line);
             }
-            newLines.add(line);
-        }
-
-        if (!achou) {
-            writer = new FileWriter(path, true);
-            writer.write(fileName + " " + pattern + " " + digest + '\n');
-        } else {
-            for (String s : newLines) {
-                writer.write(s + '\n');
+            if (!achou) {
+                writer = new FileWriter(path, true);
+                writer.write(fileName + " " + pattern + " " + digest + '\n');
+            } else {
+                for (String s : newLines) {
+                    writer.write(s + '\n');
+                }
             }
+        } catch (Exception e) {
+            throw e;
+        } finally {
+            writer.close();
+            sc.close();
         }
-
-        writer.close();
-        sc.close();
     }
 
     // Busca se o digest do tipo procurado para o arquivo procurado já se encontra
@@ -59,31 +64,36 @@ public class DigestCalculator {
     // retorna nulo.
     public DigestStatus generateDigestStatusFromList(String ListName, String fileName, String pattern, String digest)
             throws IOException {
-        File file = new File(ListName);
-        Scanner sc = new Scanner(file);
-        DigestStatus ds = DigestStatus.NOT_FOUND;
+        File file = null;
+        Scanner sc = null;
+        try {
+            DigestStatus ds = DigestStatus.NOT_FOUND;
+            file = new File(ListName);
+            sc = new Scanner(file);
+            while (sc.hasNextLine()) {
+                String line = sc.nextLine();
+                String[] splited = line.split(" ");
 
-        while (sc.hasNextLine()) {
-            String line = sc.nextLine();
-
-            String[] splited = line.split(" ");
-
-            for (int i = 1; i < splited.length - 1; i += 2) {
-                if (splited[0].equals(fileName)) {
-                    if (splited[i].equals(pattern)) {
-                        if (digest.equals(splited[i + 1])) {
-                            ds = DigestStatus.OK;
-                        } else if (!digest.equals(splited[i + 1])) {
-                            ds = DigestStatus.NOT_OK;
+                for (int i = 1; i < splited.length - 1; i += 2) {
+                    if (splited[0].equals(fileName)) {
+                        if (splited[i].equals(pattern)) {
+                            if (digest.equals(splited[i + 1])) {
+                                ds = DigestStatus.OK;
+                            } else if (!digest.equals(splited[i + 1])) {
+                                ds = DigestStatus.NOT_OK;
+                            }
                         }
+                    } else if (splited[i].equals(pattern) && digest.equals(splited[i + 1])) {
+                        ds = DigestStatus.COLISION;
                     }
-                } else if (splited[i].equals(pattern) && digest.equals(splited[i + 1])) {
-                    ds = DigestStatus.COLISION;
                 }
             }
+            return ds;
+        } catch (Exception e) {
+            throw e;
+        } finally {
+            sc.close();
         }
-        sc.close();
-        return ds;
     }
 
     // Recebe o arquivo e retorna todo seu conteudo em uma única variável, em
